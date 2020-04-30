@@ -1,0 +1,21 @@
+//${comments}
+//删除${comments}
+delete${className}(params) {
+    return fetch("/${moduleName}/${pathName}/delete", params, "delete", APPJSON)
+},
+//查看${comments}详情
+view${className}(params) {
+    return fetch("/${moduleName}/${pathName}/info", params, "get")
+},
+//新增${comments}
+save${className}(params) {
+    return fetch("/${moduleName}/${pathName}/save", params, "post", APPJSON)
+},
+//搜索${comments}
+search${className}(params) {
+    return fetch("/${moduleName}/${pathName}/search", params, "post", APPJSON)
+},
+//修改${comments}
+update${className}(params) {
+    return fetch("/${moduleName}/${pathName}/update", params, "post", APPJSON)
+},

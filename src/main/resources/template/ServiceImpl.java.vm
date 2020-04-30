@@ -1,0 +1,145 @@
+package ${package}.service.impl;
+
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.citms.common.CodeMsg;
+import com.citms.common.exception.BussinessException;
+import ${package}.dao.${className}Dao;
+import ${package}.entity.${className}Entity;
+import ${package}.pojo.api.${className}InfoResp;
+import ${package}.pojo.api.${className}SearchReq;
+import ${package}.pojo.api.${className}SearchResp;
+import ${package}.service.${className}Service;
+import ${package}.pojo.api.${className}UpdateOrSaveReq;
+
+
+@Transactional
+@Service("${classname}Service")
+public class ${className}ServiceImpl extends ServiceImpl<${className}Dao, ${className}Entity> implements ${className}Service {
+
+    @Override
+    public Long searchCount(${className}SearchReq query) {
+        return this.baseMapper.searchCount(query);
+    }
+    
+    @Override
+	public Page<${className}SearchResp> search(${className}SearchReq query) {
+    	
+		if(query.getIsPagination()!=null&&query.getIsPagination()) {
+			Page<${className}SearchResp> page = query.getPage();
+			List<${className}SearchResp> list = this.baseMapper.search(page, query);
+			//searchFilter(list);
+			return page.setRecords(list);
+		}else {
+			List<${className}SearchResp> list = this.baseMapper.search(query);
+			//searchFilter(list);
+			Page<${className}SearchResp> page = new Page<${className}SearchResp>();
+			page.setTotal(list.size());
+			return page.setRecords(list);
+		}
+		
+	}
+    
+    public void searchFilter(List<${className}SearchResp> list) {
+    	if(!CollectionUtils.isEmpty(list)) {
+    		//字段转换，比如字典转换成中文
+    	}
+    	
+    }
+    
+	@Override
+	public void save(${className}UpdateOrSaveReq req) {
+		//唯一性校验，比如说名称不能重复
+		//this.checkForKey(req);
+		//req.setCreateTime(new Date());
+        //req.setCreateBy(UserContextHolder.getUserId());
+		${className}Entity e = new ${className}Entity();
+		BeanUtils.copyProperties(req,e);	
+		this.insert(e);
+		req.set${pk.attrName}(e.get${pk.attrName}());
+	}
+
+	@Override
+	public void update(${className}UpdateOrSaveReq req) {
+	    
+	    //唯一性校验，比如说名称不能重复
+		//this.checkForKey(req);
+		//req.setUpdateTime(new Date());
+        //req.setUpdateUser(UserContextHolder.getUserId());
+	    ${className}Entity e = this.selectById(req.get${pk.attrName}());
+	    if (e == null) {
+            throw new BussinessException(CodeMsg.PARAMETER_ERROR, "记录不存在！");
+        }
+	    BeanUtils.copyProperties(req,e);
+		this.updateAllColumnById(e);		
+	}
+
+	private void checkForKey(${className}UpdateOrSaveReq req) {
+		/* demo
+		Wrapper<${className}Entity> wrapper = new EntityWrapper<${className}Entity>()
+                        .eq("is_delete", 0)
+                        .andNew()
+                        .eq("platform_name", req.getPlatformName())
+                        .or()
+                        .eq("platform_code", req.getPlatformCode());
+
+                if (StringUtils.isNotBlank(req.get${pk.attrName}())) {
+                    wrapper.andNew()
+                            .ne("$pk.columnName", req.get${pk.attrName}());
+                }
+
+                int selectCount = this.selectCount(wrapper);
+                if (selectCount > 0) {
+                    throw new BussinessException(CodeMsg.PARAMETER_ERROR, "平台名称或者平台编号重复！");
+                }
+
+                //select * from tbl_platform_access where (platform_name = #{platformName} or platform_code = #{platformCode}) and is_delete = 0
+		*/
+
+    }
+
+	@Override
+	public void deleteBatch(List<String> idList) {
+		//TODO 数据校验
+		//批量删除
+		this.deleteBatchIds(idList);
+	}
+
+	@Override
+	public ${className}InfoResp info($pk.attrType $pk.attrname) {
+		${className}Entity entity = this.selectById($pk.attrname);
+		if (entity == null) {
+           return null;
+        }
+		//字段内容转换，比如字典转中文
+		//infoFilter(entity);
+		${className}InfoResp resp = new ${className}InfoResp();
+		BeanUtils.copyProperties(entity, resp);
+		return resp;
+	}
+
+	@SuppressWarnings("unused")
+	private void infoFilter(${className}Entity entity) {
+		/*if(entity != null) {
+			//字典过滤
+	    	List<DictModel> dicts = sysDictService.getCompanyType();
+	    	if(dicts!=null) {
+				dicts.forEach(d->{
+	    			if(d.getDictionaryNo().equals(entity.getCompanytype())) {
+	    				entity.setCompanytype(d.getDictionaryValue());
+	    			}
+	    		});
+			}
+		}
+		*/
+	}
+
+}

@@ -1,0 +1,22 @@
+{
+    apiName:"search${className}",
+    type:"search",
+    apiDataFileUrl:"/static/mock/${className}Mock.js"
+},
+{
+    apiName:"view${className}",
+    type:"view",
+    apiDataFileUrl:"/static/mock/${className}Mock.js"
+},
+{
+    apiName:"save${className}",
+    type:"save",
+},
+{
+    apiName:"delete${className}",
+    type:"delete",
+},
+{
+    apiName:"update${className}",
+    type:"update",
+},

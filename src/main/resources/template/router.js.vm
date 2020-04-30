@@ -1,0 +1,14 @@
+//TODO template 记得改 functionCode
+//${comments}路径定义，记得路径配置是双份哦~~ 记得改 functionCode
+
+
+//${comments}组件定义
+const ${classname}Index = resolve => require.ensure([], () => resolve(require('@/components/${className}/Index')))
+
+{
+    path: '${classname}',
+    name: '${classname}',
+    desc: '${comments}管理',
+    component: ${classname}Index,
+    meta: { requireAuth: true, funcionCode: "00020402",keepAlive:true },
+},

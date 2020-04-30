@@ -1,0 +1,20 @@
+package ${package}.pojo.api;
+
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+
+import ${package}.entity.${className}Entity;
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@ApiModel("${comments}详细信息")
+@Data
+@EqualsAndHashCode(callSuper=false)
+public class ${className}InfoResp extends ${className}Entity{
+	
+	private static final long serialVersionUID = 1L;
+	
+}
+

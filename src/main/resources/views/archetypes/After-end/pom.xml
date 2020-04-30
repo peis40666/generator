@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.citms</groupId>
+		<!-- Your own application should inherit from project-builder-component-parent -->
+		<artifactId>project-builder-component-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../../project-builder-project/project-builder-components/project-builder-component-parent</relativePath>
+	</parent>
+	<artifactId>csw</artifactId>
+	<groupId>com.citms</groupId>
+	<packaging>jar</packaging>
+	<name>Project Builder Sample Archetype</name>
+	<version>0.0.1-SNAPSHOT</version>
+	<url>http://maven.apache.org</url>
+	<properties>
+
+		<failOnMissingWebXml>false</failOnMissingWebXml>
+		<main.basedir>${basedir}/../..</main.basedir>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
+	<dependencies>
+	
+		<!-- 		
+		<dependency>
+			<groupId>com.citms</groupId>
+			<artifactId>project-builder-component</artifactId>
+		</dependency>
+ 		-->		
+ 		<dependency>
+            <groupId>com.citms</groupId>
+            <artifactId>project-builder-component-web</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.citms</groupId>
+            <artifactId>project-builder-component-mybatisplus</artifactId>
+        </dependency>
+        
+		<dependency>
+			<groupId>com.citms</groupId>
+			<artifactId>project-builder-component-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.citms</groupId>
+			<artifactId>project-builder-component-remote</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.citms</groupId>
+			<artifactId>project-builder-component-basedatacache</artifactId>
+		</dependency>
+	</dependencies>
+	<build>
+	
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+		
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<version>1.8.1</version>
+				<executions>
+					<execution>
+						<id>appassembler</id>
+						<phase>package</phase>
+						<goals>
+							<goal>assemble</goal>
+							<goal>generate-daemons</goal>
+						</goals>
+						<configuration>
+
+							<!--<jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>-->
+
+							<repositoryLayout>flat</repositoryLayout>
+							<repositoryName>lib</repositoryName>
+							<configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
+							<configurationDirectory>config</configurationDirectory>
+							<copyConfigurationDirectory>true</copyConfigurationDirectory>
+							<includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+							<useWildcardClassPath>true</useWildcardClassPath>
+							<encoding>UTF-8</encoding>
+							<!--<argLine>-Dfile.encoding=UTF-8</argLine>-->
+							<!--<binPrefix>startup</binPrefix>-->
+							<assembleDirectory>${project.build.directory}/${project.artifactId}</assembleDirectory>
+							<extraJvmArguments>-Xms768m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=GMT+8</extraJvmArguments>
+							<!-- 生成windows脚本使用的模板,可以在.bat加上一些参数 比如title -->
+							<windowsScriptTemplate>src/main/resources/tpl/win_start.tpl</windowsScriptTemplate>
+							<platforms>
+								<platform>windows</platform>
+								<platform>unix</platform>
+							</platforms>
+							<programs>
+								<program>
+									<mainClass>com.citms.App</mainClass>
+									<name>start</name>
+								</program>
+							</programs>
+							<target>${project.build.directory}/public</target>
+							<daemons>
+								<daemon>
+									<id>start</id>
+									<wrapperMainClass>org.tanukisoftware.wrapper.WrapperSimpleApp</wrapperMainClass>
+									<mainClass>com.citms.App</mainClass>
+									<!-- <commandLineArguments> <commandLineArgument>start</commandLineArgument> 
+										</commandLineArguments> -->
+									<generatorConfigurations>
+										<generatorConfiguration>
+											<generator>jsw</generator>
+											<includes>
+												<include>windows-x86-64</include>
+												<include>windows-x86-32</include>
+											</includes>
+										</generatorConfiguration>
+									</generatorConfigurations>
+									<platforms>
+										<platform>jsw</platform>
+									</platforms>
+									<jvmSettings>
+										<initialMemorySize>768M</initialMemorySize>
+										<maxMemorySize>1024M</maxMemorySize>
+										<maxStackSize>128M</maxStackSize>
+										<!-- <systemProperties> <systemProperty>java.io.tmpdir=C:/dvms-fileserver/tmp</systemProperty> 
+											</systemProperties> -->
+
+										<extraArguments>
+											<extraArgument>-Dorg.tanukisoftware.wrapper.WrapperSimpleApp.waitForStartMain=TRUE</extraArgument>
+											<!--请确保这个文件夹存在 默认win7某些系统下 jsw不能再临时文件夹下建文件 https://jira.atlassian.com/browse/BAM-8014 -->
+											<!-- <extraArgument>-Djava.io.tmpdir=C:/cpms-fileserver/</extraArgument> -->
+										</extraArguments>
+									</jvmSettings>
+								</daemon>
+								<!--<archiverConfig>
+									<encoding>utf-8</encoding>
+								</archiverConfig>-->
+							</daemons>
+
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+      	 </plugins>
+	</build>
+	
+	<repositories>
+		<repository>
+			<id>nexus</id>
+			<url>http://192.168.0.41:8081/repository/maven-public/</url>
+			<releases />
+			<snapshots />
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>nexus</id>
+			<url>http://192.168.0.41:8081/repository/maven-public/</url>
+			<releases />
+			<snapshots />
+		</pluginRepository>
+	</pluginRepositories>
+</project>

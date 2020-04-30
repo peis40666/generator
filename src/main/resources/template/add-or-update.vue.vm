@@ -1,0 +1,226 @@
+<template>
+<div class="full-modal">
+  <c-modal :title="modeText[mode]+'${comments}'" effect="fade" width="100%" height="100%" ref="detailModal">
+    <div slot="body">
+      <c-page-loading v-if="loading"></c-page-loading>
+      <!-- ${comments} -->
+      <div class="modal-box">
+        <div class="form-box">
+          <div class="form-contain">
+            <h4 class="title">${comments}</h4>
+            <c-form :disabled="disabled" ref="form">
+              <c-container fluid>
+                <c-row>
+#foreach($column in $columns)
+        #if( "$!column.comments" == "")
+        	#set($column.comments=$column.attrname)
+        #else
+          #if($column.comments.length()>6)
+            #set($column.comments=${column.comments.substring(0,6)})
+          #end    
+        #end
+		#if($column.columnName != $pk.columnName)
+                  <c-column :col="6" class="context">
+                      <c-form-item label="${column.comments}" :label-col="4" need>
+                      	<c-input v-model="formData.${column.attrname}" :rules="[{type:'required'}]"  width="100%"></c-input>
+                      </c-form-item>  
+                  </c-column>    
+  		#end                 
+                    
+#end
+                </c-row>
+              </c-container>
+            </c-form>
+          </div>
+        </div>
+      </div>
+      <div class="btn-box">
+        <c-button type="primary" v-if="mode!='view'" @click.native="save('save')">保存</c-button>
+        <c-button type="primary" v-if="mode!='view'" @click.native="save('saveAndAdd')">保存并新增</c-button>
+        <c-button type="primary" v-if="mode!='view'" @click.native="save('saveAndClose')">保存并关闭</c-button>
+        <c-button type="primary" v-if="mode==='view'" @click.native="edit">编辑</c-button>
+        <c-button @click.native="hide">关闭</c-button>
+      </div>
+    </div>
+    <div slot="footer"></div>
+  </c-modal>
+</div>
+</template>
+
+<script>
+import api from "../../../api/api";
+import * as tool from "../../../util/tools";
+export default {
+  data() {
+    return {
+      fcode: "00020401", //TODO 功能代码 Template
+      formData: {
+        ${classname}List: []
+      },
+      opt:'',
+      mode: "view",
+      modeText:{
+        "view":"查看",
+        "add":"新增",
+        "edit":"编辑"
+      },
+      loading:false,
+      //dictData:{},
+    };
+  },
+  computed: {
+    disabled() {
+      return this.mode === "view";
+    },
+    formReqData(){
+      let obj = {};
+      for(let key in this.formData){
+          obj[key] = this.formData[key];      
+      }    
+      return obj;
+    }
+  },
+  methods: {
+    //是否有相应权限
+    hasPermission(fcode, actionCode) {
+      return true;
+      //return tool.getAuthority(fcode,actionCode)
+    },
+    goback(){
+        this.$router.go(-1)
+    },
+    reloadInfo(id) {
+      let _this = this;
+      api.view${className}({ $pk.attrname: id }).then(res => {
+        if (res.code == 0 && res.result) {
+          _this.formData = res.result;
+          
+        }
+      });
+    },
+    show(id, mode,dictData) {
+      let _this = this;
+      _this.mode = mode;
+      if (mode == "view" || mode == "edit") {
+        api.view${className}({ $pk.attrname: id }).then(res => {
+          if (res.code == 0 && res.result) {
+            _this.formData = res.result;
+            #[[_this.$refs.detailModal.open();]]#
+            
+          }
+        });
+      } else {
+         _this.formData = {
+           
+         };
+         #[[_this.$refs.detailModal.open();]]#
+        
+      }
+    },
+    hide() {
+      #[[this.$refs.detailModal.close();]]#
+      this.$emit("refreshDataList");
+    },
+    edit() {
+      this.mode = "edit";
+    },
+    save(opt){
+      let _this = this;
+      _this.opt = opt;
+      if (checkData()) {
+        _this.loading = true
+        doSubmit();
+      }
+
+      function doSubmit() {
+        if (_this.formData.$pk.attrname) {
+          _this.updateData();
+        } else {
+          _this.insertData();
+        }    
+      }
+
+      function checkData() {
+        let flag = true;
+        let errorArr = [];
+        let formData = _this.formData;
+        //TODO 数据校验字段 template
+#foreach($column in $columns) 
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end
+  
+  #if($column.columnName != $pk.columnName)
+        checkNull(formData, "${column.attrname}", "${column.comments}不能为空");                    
+  #end
+#end    
+        function checkNull(formData, field, msg) {
+          if (!formData[field] || formData[field] == "") {
+            errorArr.push(msg);
+            flag = false;
+          }
+        }
+
+        if (!flag) {
+          _this.showError(errorArr);
+        }
+        return flag;
+      }
+    },
+    saveSuccessCallback(id){
+      if(this.opt=='saveAndAdd'){
+        this.mode = 'add';
+        this.formData ={
+         
+        };
+      }else if(this.opt=='saveAndClose'){
+        this.hide();
+      } else if (this.opt=='save') {
+      	this.mode = "edit";
+        this.cToast({
+          text: "保存成功！",
+          type: "success",
+          placement: "top",
+          closeOnClick: true
+        });
+        this.reloadInfo(id);
+      }
+    },
+    insertData(){
+      let _this = this;
+      api.save${className}(this.formReqData).then(res=>{
+        if(res.code == 0 ){ 
+          _this.saveSuccessCallback(res.result.$pk.attrname);
+        }
+        this.loading = false;
+      })
+    },
+    updateData(){
+      let _this = this;
+      api.update${className}(this.formReqData).then(res=>{
+        if(res.code == 0){
+          _this.saveSuccessCallback(res.result.$pk.attrname);
+        }
+        this.loading = false;
+      })
+    },
+    showError(err){
+      if(err){
+          let msg = (typeof err != "string" )? err.join("|"):err;
+          this.cToast({
+            text: msg,
+            type: "warning",
+            placement: "top",
+            closeOnClick: true
+        });
+      }
+    },
+  }
+};
+</script>
+<style lang="scss">
+</style>

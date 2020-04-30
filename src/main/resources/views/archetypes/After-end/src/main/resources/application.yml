@@ -1,0 +1,147 @@
+#注意每个配置项“：”后面必须有一个空格
+#服务配置
+server:
+  #端口号
+  servlet:
+    #应用访问路径
+    context-path: /
+  tomcat:
+   uri-encoding: UTF-8
+  compression:
+   enabled: true
+   mime-types: application/json,application/xml,text/html,text/xml,text/plain
+   min-response-size: 2048
+    
+spring:
+ resources:
+  #静态资源路径
+  static-locations: file:./wwwroot
+ http:
+  encoding:
+   force: true
+   charset: UTF-8
+   enabled: true
+#json格式转化配置
+ jackson:
+  date-format: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+  time-zone: GMT+8
+
+##### rabbitmq 配置 ###
+ rabbitmq:
+  publisherConfirms: true
+  routingKey:
+   FrontDevice: Database.Changed.FrontDevice
+   Spotting: Database.Changed.Spotting
+   Company: Database.Changed.Company
+   FrontdeviceGroup: Database.Changed.FrontdeviceGroup
+   FrontdeviceService: Database.Changed.FrontdeviceService
+   Project: Database.Changed.Project
+   Road: Database.Changed.Road
+   SpottingGroup: Database.Changed.SpottingGroup
+   Staff: Database.Changed.Staff
+   Tags: Database.Changed.Tags
+   Test: Database.Changed.Test
+
+#日志配置
+log:
+ name: web-${spring.application.name}
+
+zuul:
+ strip-prefix: false
+ routes:
+  common:
+   path: /api/Other/**
+   prefix: /api/Other
+   service-id: smw
+   strip-prefix: false
+ host:
+  connect-timeout-millis: 60000
+  socket-timeout-millis: 60000
+ sensitive-headers:
+  - Cookie,Set-Cookie,Authorization
+ribbon:
+  ReadTimeout: 600000
+  ConnectTimeout: 600000
+hystrix:
+  command:
+    c4i-store:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 600000
+            ribbon:
+              ReadTimeout: 60000
+              ConnectTimeout: 60000
+
+##### mybatis plus配置 #####
+mybatis-plus:
+  # mapper xml文件目录
+ mapper-locations: classpath:mapper/*Dao.xml
+ #实体扫描，多个package用逗号或者分号分隔
+ typeAliasesPackage: com.citms.entity
+ #typeEnumsPackage: com.citms.enums
+  #主键类型  0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID"
+ global-config:
+  id-type: 3
+  #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+  field-strategy: 2
+  #驼峰下划线转换
+  db-column-underline: false
+  #刷新mapper 调试神器
+  refresh-mapper: true
+  #配置返回数据库(column下划线命名&&返回java实体是驼峰命名)，自动匹配无需as（没开启这个，SQL需要写as： select user_id as userId）
+  sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector #软删除
+  logic-delete-value: 1
+  logic-not-delete-value: 0
+
+ configuration:
+  jdbc-type-for-null: 'null' #注意：单引号
+  map-underscore-to-camel-case: false
+  #禁用缓存
+  cache-enabled: false
+  db-config:
+   db-type: oracle
+
+#MQ消息总线和通用缓存组件
+com:
+  citms:
+    component:
+      basedatacache:
+        failRetry: 3 #加载缓存失败重试次数,默认3
+        cacheTimeOutMin: 10 #缓存失效时间，单位：分,默认30分钟
+        maxThreadNum: 10 #加载缓存最大启动线程数,默认10
+        failRetryMaxSecond: 5 #加载缓存失败重试最大时间间隔，单位：秒,默认10秒
+        failRetryMinSecond: 2 #加载缓存失败重试最小时间间隔，单位：秒,默认3秒
+        useCache: #需加载的通用缓存数据
+          - SomeDict
+        #          - AllDevice
+        #          - AllSpottingGroup
+        dictCodes: #字典缓存加载的字典项，如果不配置，不会加载
+          - 4
+          - 1000
+      msgbus:
+        rabbitmq: #目前只支持了rabbitmq,已经预留了接口后面再扩展kafaka
+          enable: true #是否启用rabbitmq消息总线，不设置不会加载rabbitmq消息总线
+          queueList: # queue声明队列，支持声明多个队列
+            - name: Citms.${spring.application.name}.${spring.cloud.consul.discovery.ipAddress}:${server.port} #队列名称，规范： Citms.${服务标识}.${ip}:${port}
+              durable: true #是否持久化，含义同spring相关参数配置,默认：true
+              autoDelete: false #是否自动删除，含义同spring相关参数配置，默认：false
+          exchangeBinder: #声明交换机
+            #            - name: Citms.Exchange.TianjinEPPV5 #交换机名称
+            - type: topic #交换机类型，含义同spring相关参数配置，默认:topic
+              durable: true #是否持久化，含义同spring相关参数配置，默认：true
+              autoDelete: true #是否自动删除，含义同spring相关参数配置,默认：false
+              bindings: #绑定路由键，用于消息监听，queueName：队列名称，routingKey：路由键
+                - queueName: Citms.${spring.application.name}.${spring.cloud.consul.discovery.ipAddress}:${server.port}
+                  routingKey: Database.Changed.Dictionary
+            #          sender:
+            #            defaultExchange: ${com.citms.component.msgbus.rabbitmq.exchangeBinder[0].name} # 消息默认发送到的交换机
+            #topics: #配置某个主题的消息发送到的交换机，如果跟defaultExchange相同可省略，name：消息的主题，支持“#”通配符，exchange：交换机名称
+            # - {name: topic1.#,exchange: exchangeForMsgBus}
+            #- {name: topic2,exchange: exchangeForMsgBus}
+          msgReceiver:
+            maxMsgProcessThreadNum: 10 #调用消息处理启用的最大线程数，默认:10
+            maxConcurrentConsumers: 1 #消息处理最大消费者数量，默认:1
+            concurrentConsumers: 1 #消息处理最大消费者数量，默认:1

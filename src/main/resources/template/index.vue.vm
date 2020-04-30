@@ -1,0 +1,482 @@
+<template>
+  <slider-left id="${className}Web">
+    <div slot="left">
+      <div class="form-box search-of">
+        <c-form>
+#foreach($column in $columns)
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end
+          <c-form-item label="${column.comments}" :label-col="3">
+            <c-input v-model="searchData.${column.attrname}" @keyup.enter.native="searchEvent"></c-input>
+          </c-form-item>
+#end
+          <!-- <c-form-item label="xxx类型" :label-col="3">
+            <c-select
+              :options="dictData.xxxTypeList.data"
+              v-model="searchData.xxxtype"
+              width="100%"
+            ></c-select>
+          </c-form-item> -->
+        </c-form>
+      </div>
+      <div class="btn-box btn-box-fixed block-bg">
+          <c-button
+            type="primary"
+            @click.native="searchEvent"
+            :disabled="!hasPermission(fcode,'00')"
+          >查询</c-button>
+          <c-button @click.native="resetSearchEvent">重置</c-button>
+      </div>
+    </div>
+    <div slot="right">
+      <c-search :data="searchBoxData" @search="searchChange" ref="searchBox" class="csearch"></c-search>
+      <div class="table-box">
+        <div class="tableTool" style="overflow: visible">
+          <c-button type="primary" size="sm" @click.native="addEvent()">添加$comments</c-button>
+          <c-dropdown >
+            <div slot="trigger">
+              <c-button>
+                导出
+                <c-icon :type="exportIconUp?'angle-up' : 'angle-down'" ></c-icon>
+              </c-button>
+            </div>
+            <li><a @click="exportExcel(true)">全部记录</a></li>
+            <li><a @click="exportExcel(false)">选中记录</a></li>
+          </c-dropdown>
+        </div> 
+
+        <c-data-table
+          fixed-columns
+          id="${classname}Table"
+          :context="self"
+          :height="calcTableHeight"
+          :url="baseUrl"
+          :token="token"
+          :appNo="appNo"
+          :async="true"
+          :filter="false"
+          :selection="selection"
+          :pagination="pagination"
+          :selectCols="true"
+          :dataNumber="true"
+          idFiled="$pk.attrname"
+          :search="false"
+          @change="changeGridEvent"
+          :source="sourceGrid"
+          :columns="columns"
+        ></c-data-table>
+      </div>    
+    </div>
+    <!-- 编辑 -->
+    <div slot="full">         
+      <c-data-info ref="dataInfo" @refreshDataList="searchEvent"></c-data-info>
+    </div>
+  </slider-left>
+</template>
+
+<script type="text/ecmascript-6">
+import api from "../../api/api";
+import * as tool from "../../util/tools";
+import dataInfo from "./modal/dataInfo";
+export default {
+  name: "${className}",
+  data() {
+    return {
+      self:this,
+      //通用代码
+      appNo: appNo,
+      baseUrl: baseURL,
+      token: "Basic " + Token,
+      Token: window.Token,
+      fcode: "00020401", //TODO 功能代码 Template
+      calcTableHeight: "100px", //表格高度
+      exportIconUp:false,
+      //TODO 字典数据 Template
+      /*
+      dictData: {
+        groupTypeList: {
+          kind: "3103",
+          data: []
+        }
+      },
+      */
+      //TODO 筛选模型 Template
+      filterData: {
+#foreach($column in $columns)
+        ${column.attrname} : "",     
+#end
+      },
+      //TODO  搜索模型 Template
+      searchData: {
+#foreach($column in $columns)
+        ${column.attrname} : "",     
+#end        
+      },
+      //查询参数
+      params: {
+        isPagination: true,
+        pageSize: 20,
+        pageNo: 1,
+        //TODO 排序字段 Template
+        sortField: "",
+        sortOrder: "asc"
+      },
+
+      //table分页配置
+      pagination: {
+        current: 1,
+        total: 10,
+        pagesize: 20
+      },
+      // 表格字段 Template
+      columns: [
+#foreach($column in $columns)
+        {
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end           
+          title: "${column.comments}",       
+          dataIndex: "${column.attrname}",
+          align: "left",
+          width: 200,
+          fixed: true
+	#if($column.attrType == "Date"),
+          render:(text, record, index)=>{
+            return this.formatDate(text);
+          }
+    #end    
+        },
+#end
+        {
+          title: "操作",
+          width: "200",
+          align: "left",
+          fixed: true,
+          dataIndex: "",
+          render: (text, record, index) => {
+            let itemId = record.$pk.attrname; //id字段 Template
+            //console.log(record);
+            let fcode = this.fcode;
+
+            return `
+                     <span class="item mr10">                             
+                        <a href="javascript:;" @click="viewEvent('${itemId}')" style="color:#04adfc" v-if="hasPermission('${fcode}','00')">详情</a>
+                     </span>
+                      <span class="item mr10">
+                        <a href="javascript:;" @click="editEvent('${itemId}')" style="color:#04adfc" v-if="hasPermission('${fcode}','02')">编辑</a>
+                      </span>
+                      <span class="item">
+                        <a href="javascript:;" @click="deleteEvent('${itemId}')" style="color:#04adfc" v-if="hasPermission('${fcode}','03')">删除</a>
+                      </span>
+                  `;
+          }
+        }
+      ],
+      // 列表数据
+      sourceGrid: [],
+      selection: {
+        checkRows: []
+      },
+      searchBoxData: {
+        expandRow: 2,
+        searchBoxs: [      
+#foreach($column in $columns)
+          {
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end 
+
+            id: "$column.attrname",
+            isMultiple: false, //是否多选
+            title: "${column.comments}",
+            defalut: [], //时间选中项值
+            expand: false, //是否展开
+            show: false, //列表是否显示
+            shoWIcon: false, //展开按钮是否显示
+            data: [
+              {
+                value: "0",
+                text: "启用"
+              },
+              {
+                value: "1",
+                text: "停用"
+              }
+            ],
+            isShowAll: true,
+            checkAll: true
+          },
+#end
+        ]
+      }
+
+    };
+  },
+  computed: {},
+  methods: {
+    //是否有相应权限
+    hasPermission(fcode, actionCode) {
+      return true;
+      //return tool.getAuthority(fcode,actionCode)
+    },
+    //表格计算高度
+    calcTableHeightFun() {
+      setTimeout(()=>{
+        this.calcTableHeight =  document.getElementById("${className}Web").offsetHeight- (document.querySelector('.csearch')?document.querySelector('.csearch').offsetHeight:0) - 160 + "px";
+      },100);
+    },
+    //格式化时间
+    formatDate(date){
+      if(date){
+          return tool.formatDate(date);
+      }else{
+          return '';
+      }
+    },
+    //初始化字典
+    //字典
+    initDictionary() {
+      let _this = this;
+      return new Promise((resolve, reject) => {
+          
+          let kindMap = {};
+          let kindList = [];
+          for (var dict in _this.dictData) {
+            kindMap[_this.dictData[dict].kind] = dict;
+            kindList.push(_this.dictData[dict].kind);
+          }
+          if (kindList.length > 0) {
+            api.getDict(kindList).then(res => {
+              if (res.code == 0) {
+                for (var kind in res.result) {
+                  buildDictionary(res.result[kind], kindMap[kind]);
+                }
+                resolve(_this.dictData);
+              }else{
+                reject();
+              }
+            });
+          }
+      });
+
+      function buildDictionary(result, key) {
+        let array = [];
+        for (let p = 0; p < result.length; p++) {
+          array.push({
+            value: result[p].dictionaryNo,
+            label: result[p].dictionaryValue,
+            text: result[p].dictionaryValue,
+          });
+        }
+        _this.dictData[key].data = array;
+      }
+    },
+    //详情事件
+    viewEvent(id) {
+      if (id) {      
+        #[[this.$refs.dataInfo.show(id,"view",this.dictData);]]#
+      } 
+    },
+    //新增事件
+    addEvent(){
+      #[[this.$refs.dataInfo.show(null,"add",this.dictData);]]#
+    },
+    //编辑事件
+    editEvent(id) {
+      
+      if (id) {
+        #[[this.$refs.dataInfo.show(id,"edit",this.dictData);]]#
+      } 
+    },
+
+    //删除事件
+    deleteEvent(id) {
+      this.deleteEventFun([id]);
+    },
+    //批量删除事件
+    deleteBatchEvent() {
+      let checkRows = this.selection.checkRows;
+      if (checkRows.length == 0) {
+        this.cToast({
+          text: "至少选中一条记录后再删除！",
+          type: "warning",
+          placement: "top",
+          closeOnClick: true
+        });
+        return;
+      }
+      let postData = [];
+      checkRows.forEach(element => {
+        postData.push(element.$pk.attrname);
+      });
+      this.deleteEventFun(postData);
+    },
+    deleteEventFun(postData) {
+      let that = this;
+      this.cModal.confirm({
+        title: "提示信息",
+        message: "确认删除吗？",
+        effect: "zoom",
+        width: "260px",
+        type: "warning",
+        onConfirm() {
+          //Template
+          api.delete${className}(postData).then(res => {
+            if (res.code == 0) {
+              that.searchEvent();
+              that.cToast({
+                text: res.message ? res.message : "操作成功",
+                type: "success",
+                placement: "top",
+                closeOnClick: true
+              });
+            } else {
+              that.searchEvent();
+              that.cToast({
+                text: res.message ? res.message : "操作失败",
+                type: "warning",
+                placement: "top",
+                closeOnClick: true
+              });
+            }
+          });
+        }
+      });
+    },
+    //重置查询事件
+
+    resetSearchEvent(){
+      this.filterData = {};
+      this.searchData = {};
+      this.searchEvent();
+    },
+    //查询事件
+    searchChange(obj){
+      this.filterData = obj;
+      this.searchEvent(true);
+    },
+    searchEvent(notRefreshCache) {
+      //获取查询条件数据
+      this.getParma(this.params,notRefreshCache);
+      this.params.pageNo = 1;
+      this.searchEventFun();
+    },
+    searchEventFun() {
+      //Template
+      api.search${className}(this.params).then(res => {
+        if (res.code == 0) {
+          this.pagination.current = this.params.pageNo;
+          this.pagination.total = res.totalCount;
+          this.pagination.pagesize = this.params.pageSize;
+          this.sourceGrid = res.result;
+        }
+      });
+    },
+    //表格分页事件
+    changeGridEvent(paginations, query, sort, filter) {
+      if (paginations.pagesize) {
+        this.params.pageNo = paginations.current;
+        this.params.pageSize = paginations.pagesize;
+        this.getParma(this.params);
+        this.searchEventFun();
+      }
+    },
+    //获取查询参数FilterList
+    getParma(params,notRefreshSearchData) {
+      notRefreshSearchData = false;
+      //TODO 查询条件 Template
+      if(notRefreshSearchData!==true){
+
+#foreach($column in $columns)        
+        //$column.comments
+        if (this.searchData.$column.attrname) {
+          params.$column.attrname = this.searchData.$column.attrname;
+        } else {
+          delete params.$column.attrname;
+        }
+#end        
+
+      }
+       //过滤条件
+#foreach($column in $columns)        
+        //$column.comments
+        if (this.filterData.$column.attrname) {
+          params.$column.attrname = this.filterData.$column.attrname;
+        } else {
+          delete params.$column.attrname;
+        }
+#end              
+    },
+     //导出全部数据
+    exportExcel(isAll){
+      let columns = this.columns;
+      let filter = Object.assign({},this.filter);
+      filter.isPagination = false;
+      if(!isAll && this.selection.checkRows.length==0){
+        this.cToast({
+          text: '请选择要导出的数据',
+          type: "warning",
+          placement: "top",
+          closeOnClick: true
+        });
+        return;
+      }
+      //TODO Template functionCode
+      let data = isAll?(window.baseURL+"/${moduleName}/${pathName}/search"):this.selection.checkRows;
+      tool.exportExcel({
+        columns:columns,
+        data: data,
+        params:filter,
+        methods:"post",
+        functionCode:"000406",
+        title:"${comments}列表"
+      }).catch(err=>{
+        this.cAlert({
+          content: err,
+          type: 'danger',
+          placement: 'top',
+          duration: 2000,
+        })
+      })
+    },
+  },
+  watch: {},
+  mounted() {
+    let that = this;
+    if (!this.fcode) {
+      this.fcode = tool.getQueryString("fcode");
+    }
+    this.$nextTick(() => {
+      //计算表格高度
+      this.calcTableHeightFun();
+      
+      //初始化字典
+      this.initDictionary().then((dictMap)=>{
+          //debugger
+      });
+
+      //查询数据
+      this.searchEvent();
+    });
+  },
+  components: {
+   
+    "c-data-info":dataInfo
+  }
+};
+</script>
+<style type="text/css" lang="scss" scoped>
+</style>

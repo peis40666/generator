@@ -1,0 +1,11 @@
+
+com.citms.projectbuilder.component.msgbus.annotation
+com.citms.projectbuilder.component.msgbus.autoconfigure.rabbitmq
+com.citms.projectbuilder.component.msgbus.autoconfigure.rabbitmq.property
+com.citms.projectbuilder.component.msgbus.bus
+com.citms.projectbuilder.component.msgbus.bus.impl
+com.citms.projectbuilder.component.msgbus.receiver
+com.citms.projectbuilder.component.msgbus.receiver.impl
+com.citms.projectbuilder.component.msgbus.sender
+com.citms.projectbuilder.component.msgbus.sender.impl
+com.citms.projectbuilder.component.msgbus.util

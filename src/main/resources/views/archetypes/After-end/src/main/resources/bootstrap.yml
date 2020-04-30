@@ -1,0 +1,56 @@
+#注意每个配置项“：”后面必须有一个空格
+#服务配置
+server:
+  #端口号
+  port: 12019
+  servlet:
+    #应用访问路径
+    context-path: /
+
+#consul配置
+spring:
+  profiles:
+    active: prod
+  application:
+    name: csw
+  cloud:
+    consul:
+      #微服务注册中心地址
+      host: 192.168.0.116
+      port: 8500
+      discovery:
+        instance-id: ${spring.application.name}:${spring.cloud.consul.discovery.ipAddress}:${server.port}
+        service-name: ${spring.application.name}
+        health-check-interval: 10s
+        register: false
+        tags: 云搜索服务,swagger=swagger-ui.html,application=${spring.application.name}
+        prefer-ip-address: true
+        healthCheckPath: /actuator/health
+        ipAddress: 192.168.0.116
+
+  ##### 多数据源配置 #####
+  datasource:
+    dynamic:
+      primary: oracle
+      #oracle 数据源配置
+      datasource:
+        oracle:
+          username: TJEPPV5
+          password: citms
+          driver-class-name: oracle.jdbc.driver.OracleDriver
+          url: jdbc:oracle:thin:@//192.168.0.152:1521/orcl
+        #librA 数据源配置
+        librA:
+          username: tjeppv5
+          password: citms@123
+          driver-class-name: org.postgresql.Driver
+          url: jdbc:postgresql://192.168.0.147:25308/tjeppv5
+#日志配置
+database:
+  #显示spl性能信息
+  showPerformance: true
+
+#日志级别配置
+logging:
+  level:
+    com.citms: debug

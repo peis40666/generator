@@ -1,0 +1,57 @@
+package ${package}.service;
+
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.service.IService;
+import ${package}.entity.${className}Entity;
+import ${package}.pojo.api.${className}InfoResp;
+import ${package}.pojo.api.${className}SearchReq;
+import ${package}.pojo.api.${className}SearchResp;
+import ${package}.pojo.api.${className}UpdateOrSaveReq;
+
+import java.util.List;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date 2018/10/29
+ */
+public interface ${className}Service extends IService<${className}Entity> {
+
+    /**
+    	 * 条件查询总记录数
+     *
+     * @param query
+     * @return
+     */
+    Long searchCount(${className}SearchReq query);
+
+    Page<${className}SearchResp> search(${className}SearchReq query);
+
+	/**
+	 * 保存${comments}
+	 * @param ${classname}
+	 */
+	void save(${className}UpdateOrSaveReq ${classname});
+
+	/**
+	 * 修改${comments}
+	 * @param ${classname}
+	 */
+	void update(${className}UpdateOrSaveReq ${classname});
+
+	/**
+	 * 批量删除${comments}
+	 * @param idList
+	 */
+	void deleteBatch(List<String> idList);
+
+	/**
+	 * 显示${comments}详情
+	 * @param $pk.attrname
+	 * @return
+	 */
+	${className}InfoResp info(String $pk.attrname);
+}
+

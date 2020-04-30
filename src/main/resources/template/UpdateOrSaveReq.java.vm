@@ -1,0 +1,35 @@
+package ${package}.pojo.api;
+
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+
+import ${package}.entity.${className}Entity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import javax.validation.constraints.NotBlank;
+import com.citms.common.validator.group.UpdateGroup;
+import java.io.Serializable;
+import java.util.Date;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@ApiModel("${comments}修改或保存表单对象")
+@Data
+@EqualsAndHashCode(callSuper=false)
+public class ${className}UpdateOrSaveReq implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+	/**
+	 * $column.comments
+	 */
+#if($column.columnName == $pk.columnName)
+	@NotBlank(message="$column.comments不能为空",groups = {UpdateGroup.class})
+#end
+	@ApiModelProperty("$column.comments")
+	private $column.attrType $column.attrname;
+#end
+
+}

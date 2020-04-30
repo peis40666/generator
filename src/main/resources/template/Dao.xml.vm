@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="${package}.dao.${className}Dao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="${package}.entity.${className}Entity" id="${classname}Map">
+#foreach($column in $columns)
+        <result property="${column.attrname}" column="${column.columnName}"/>
+#end
+    </resultMap>
+
+	<select id="searchCount" parameterType="${package}.pojo.api.${className}SearchReq" resultType="long">
+		select
+			COUNT(1)
+		from ${tableName} X
+		<where>
+
+			<if test="${pk.attrname}List != null and ${pk.attrname}List.size()>0">
+				and X.${pk.attrname} IN
+				<foreach collection="${pk.attrname}List" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			
+#foreach($column in $columns)
+    #if($column.attrType == 'String')
+            <if test="${column.attrname} != null and ${column.attrname} != '' ">
+        	    and X.${column.columnName} = #{${column.attrname}}
+        	</if>
+    #else
+            <if test="${column.attrname} != null">
+             	and X.${column.columnName} = #{${column.attrname}}
+            </if>
+    #end
+#end		
+			
+		</where>
+	</select>
+
+	<select id="search" parameterType="${package}.pojo.api.${className}SearchReq" resultType="${package}.pojo.api.${className}SearchResp">
+		select 
+#foreach($column in $columns)
+		X.${column.columnName} as ${column.attrname} #if($velocityCount != $columns.size()),#end
+#end
+
+		from ${tableName} X
+		<where>
+			<if test="${pk.attrname}List != null and ${pk.attrname}List.size()>0">
+				and X.${pk.attrname} IN
+				<foreach collection="${pk.attrname}List" index="index" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			
+#foreach($column in $columns)
+    #if($column.attrType == 'String')
+            <if test="${column.attrname} != null and ${column.attrname} != '' ">
+        	    and X.${column.columnName} = #{${column.attrname}}
+        	</if>
+    #else
+            <if test="${column.attrname} != null">
+             	and X.${column.columnName} = #{${column.attrname}}
+            </if>
+    #end
+#end
+        </where>
+        <if test="sortField != null and sortOrder != null and sortField != '' and sortOrder != '' ">
+			order by ${sortField} ${sortOrder}
+		</if>
+	</select>
+</mapper>

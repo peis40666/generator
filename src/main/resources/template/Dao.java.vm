@@ -1,0 +1,25 @@
+package ${package}.dao;
+
+import ${package}.entity.${className}Entity;
+import ${package}.pojo.api.${className}SearchReq;
+import ${package}.pojo.api.${className}SearchResp;
+import com.baomidou.mybatisplus.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import java.util.List;
+
+/**
+ * ${comments}
+ * 
+ * @author denghq
+ * @date 2018/10/29
+ */
+@Mapper
+public interface ${className}Dao extends BaseMapper<${className}Entity> {
+
+    Long searchCount(${className}SearchReq query);
+
+	List<${className}SearchResp> search(Page<${className}SearchResp> page, ${className}SearchReq query);
+
+	List<${className}SearchResp> search(${className}SearchReq query);
+}

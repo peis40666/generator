@@ -1,0 +1,482 @@
+<template>
+<div class="full-modal">
+  <c-modal :title="modeText[mode]+'${comments}'" effect="fade" width="100%" height="100%" ref="detailModal">
+    <div slot="body">
+      <c-page-loading v-if="loading"></c-page-loading>
+      <!-- ${comments} -->
+      <div class="modal-box">
+        <div class="form-box">
+          <div class="form-contain">
+            <h4 class="title">${comments}</h4>
+            <c-form :disabled="disabled" ref="form">
+              <c-container fluid>
+                <c-row>
+#foreach($column in $columns)
+        #if( "$!column.comments" == "")
+        	#set($column.comments=$column.attrname)
+        #else
+          #if($column.comments.length()>6)
+            #set($column.comments=${column.comments.substring(0,6)})
+          #end    
+        #end    
+        #if($column.columnName != $pk.columnName)
+                  <c-column :col="6" class="context">
+                      <c-form-item label="${column.comments}" :label-col="4" need>
+                      	<c-input v-model="formData.${column.attrname}" :rules="[{type:'required'}]" width="100%"></c-input>
+                      </c-form-item>  
+                  </c-column>    
+  		#end              
+#end
+                </c-row>
+              </c-container>
+            </c-form>
+          </div>
+        </div>
+      </div>
+
+    <!-- 从表信息 TODO template ,换成自己的从表--> 
+    <!--  ${comments}信息 TODO template  -->
+    <div class="modal-box">
+        <div class="form-box">
+          <div class="form-contain">
+            <h4 class="title">${comments}</h4>
+            <div class="table-box">
+              <div class="tableTool">
+                <c-button
+                  type="primary"
+                  size="sm"
+                  @click.native="addLineEvent()"
+                  :disabled="disabled"
+                >添加</c-button>
+                <c-button
+                  type="primary"
+                  size="sm"
+                  @click.native="clearLines()"
+                  :disabled="disabled"
+                >清空</c-button>
+              </div>
+
+              <!-- idFiled TODO template -->
+              <c-data-table
+                fixed-columns
+                :context="self"
+                ref="formDataTable"
+                :height="calcLineTableHeight"
+                :page="true"
+                :filter="false"
+                :selectCols="false"
+                :dataNumber="false"
+                idFiled="$pk.attrname" 
+                :search="true"
+                :source="formData.lineData"
+                :columns="lineColumns"
+              ></c-data-table>
+             
+              <!-- idFiled,title TODO template -->
+              <c-modal
+                title="选择${comments}"
+                height="80% "
+                effect="fade"
+                width="60%"
+                ref="lineModal"
+              >
+                <div slot="body">
+                  <c-data-table
+                    fixed-columns
+                    idFiled="$pk.attrname"
+                    :height="calcLineModalTableHeight"
+                    :async="false"
+                    :selectCols="false"
+                    :dataNumber="false"
+                    :search="true"
+                    :source="lineModalSource"
+                    :columns="lineModalColumns"
+                    :selection="lineModalSelection"
+                  ></c-data-table>
+                  
+                </div>
+                <div slot="footer">
+                  <div class="btn-box">
+                    <c-button type="primary" :disabled="disabled" @click.native="selectLineSureEvent()">确定</c-button>
+                    <c-button @click.native="$refs.lineModal.close()">取消</c-button>
+                  </div>
+                </div>
+              </c-modal>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="btn-box">
+        <c-button type="primary" v-if="mode!='view'" @click.native="save('save')">保存</c-button>
+        <c-button type="primary" v-if="mode!='view'" @click.native="save('saveAndAdd')">保存并新增</c-button>
+        <c-button type="primary" v-if="mode!='view'" @click.native="save('saveAndClose')">保存并关闭</c-button>
+        <c-button type="primary" v-if="mode==='view'" @click.native="edit">编辑</c-button>
+        <c-button @click.native="hide">关闭</c-button>
+      </div>
+    </div>
+    <div slot="footer"></div>
+  </c-modal>
+</div>
+</template>
+
+<script>
+import api from "../../../api/api";
+import * as tool from "../../../util/tools";
+export default {
+  data() {
+    return {
+      self:this,
+      fcode: "00020401", //TODO 功能代码 Template
+      formData: {
+        lineData: [] //TODO lineData(lineData为从表对应xxxList字段) Template
+      },
+      opt:'',
+      mode: "view",
+      modeText:{
+        "view":"查看",
+        "add":"新增",
+        "edit":"编辑"
+      },
+      loading:false,
+      //dictData:{},
+      calcLineTableHeight: "200px",
+      calcLineModalTableHeight: "400px",
+      lineModalSource:[],
+      // 从表表格字段 TODO Template
+      lineColumns: [
+#foreach($column in $columns)
+        {
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end           
+          title: "${column.comments}",       
+          dataIndex: "${column.attrname}",
+          align: "left",
+          width: 200,
+          fixed: true
+        },
+#end
+        {
+          title: "操作",
+          width: "200",
+          fixed: true,
+          dataIndex: "",
+          render: (text, record, index) => {
+            return `
+                      <span class="item">
+                        <a href="javascript:;" @click="deleteLineEvent('${index}')" style="color:#04adfc">删除</a>
+                      </span>
+                  `;
+          }
+        }
+      ],
+      // 从表弹框表格字段 TODO Template
+      lineModalColumns: [
+#foreach($column in $columns)
+        {
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end           
+          title: "${column.comments}",       
+          dataIndex: "${column.attrname}",
+          align: "left",
+          width: 200,
+          fixed: true
+        },
+#end
+      ],
+      lineModalSelection: {
+        checkRows: []
+      },
+      //从表弹框毛数据
+      lineModalData: [],
+      lineSearchData:{
+        searchKey:""
+      },
+      lineModalDataReqParams:{
+        isPagination: false,
+        sortField: "createTime",
+        sortOrder: "desc"
+      }
+    };
+  },
+  computed: {
+    disabled() {
+      return this.mode === "view";
+    },
+  },
+  methods: {
+    //是否有相应权限
+    hasPermission(fcode, actionCode) {
+      return true;
+      //return tool.getAuthority(fcode,actionCode)
+    },
+    goback(){
+        this.$router.go(-1)
+    },
+    getFormReqData(){
+         let obj = {};
+
+          for(let key in this.formData){
+            if(key != "lineData"){ //TODO lineData(lineData为从表对应xxxList字段) Template
+              obj[key] = this.formData[key];
+            }
+          }
+
+          if(this.formData.lineData){ //TODO lineData(lineData为从表对应xxxList字段) Template
+            obj.${pk.attrname}s = this.formData.lineData.map((v)=>{return v.$pk.attrname;});
+          }
+
+          return obj;
+    },
+    reloadInfo(id) {
+      let _this = this;
+      api.view${className}({ $pk.attrname: id }).then(res => {
+        if (res.code == 0 && res.result) {
+     	  for(let k in res.result){
+          	_this.formData[k] = res.result[k];
+          }
+          _this.formData.lineData = [];
+          _this.loadLineModalData();
+        }
+      });
+    },
+    show(id, mode,dictData) {
+      let _this = this;
+      _this.mode = mode;
+      this.$refs.formDataTable.query = "";
+      if (mode == "view" || mode == "edit") {
+        api.view${className}({ $pk.attrname: id }).then(res => {
+          if (res.code == 0 && res.result) {
+            for(let k in res.result){
+	          _this.formData[k] = res.result[k];
+	        }
+            #[[_this.$refs.detailModal.open();]]#
+            _this.loadLineModalData();
+          }
+        });
+      } else {
+         _this.formData = {
+           lineData:[] //TODO lineData(lineData为从表对应xxxList字段) Template
+         };
+         #[[_this.$refs.detailModal.open();]]#
+         _this.loadLineModalData();
+      }
+    },
+    hide() {
+      #[[this.$refs.detailModal.close();]]#
+      this.$emit("refreshDataList");
+    },
+    edit() {
+      this.mode = "edit";
+    },
+    save(opt){
+      let _this = this;
+      _this.opt = opt;
+      if (checkData()) {
+        _this.loading = true
+        doSubmit();
+      }
+
+      function doSubmit() {
+        if (_this.formData.$pk.attrname) {
+          _this.updateData();
+        } else {
+          _this.insertData();
+        }    
+      }
+
+      function checkData() {
+        let flag = true;
+        let errorArr = [];
+        let formData = _this.formData;
+        //TODO 数据校验字段 template
+#foreach($column in $columns) 
+  #if( "$!column.comments" == "")
+    #set($column.comments=$column.attrname)
+  #else
+    #if($column.comments.length()>6)
+      #set($column.comments=${column.comments.substring(0,6)})
+    #end    
+  #end
+  #if($column.columnName != $pk.columnName)
+        checkNull(formData, "${column.attrname}", "${column.comments}不能为空");                    
+  #end
+#end    
+        function checkNull(formData, field, msg) {
+          if (!formData[field] || formData[field] == "") {
+            errorArr.push(msg);
+            flag = false;
+          }
+        }
+
+        if (!flag) {
+          _this.showError(errorArr);
+        }
+        return flag;
+      }
+    },
+    saveSuccessCallback(id){
+      if(this.opt=='saveAndAdd'){
+        this.mode = 'add';
+        this.formData ={
+         	lineData:[] //TODO lineData(lineData为从表对应xxxList字段) Template
+        };
+        this.loadLineModalData();
+      }else if(this.opt=='saveAndClose'){
+        this.hide();
+      } else if (this.opt=='save') {
+      	this.mode = "edit";
+        this.cToast({
+          text: "保存成功！",
+          type: "success",
+          placement: "top",
+          closeOnClick: true
+        });
+        this.reloadInfo(id);
+      }
+    },
+    insertData(){
+      let _this = this;
+      api.save${className}(this.getFormReqData()).then(res=>{
+        if(res.code == 0 ){ 
+          _this.saveSuccessCallback(res.result.$pk.attrname);
+        }
+        this.loading = false;
+      })
+    },
+    updateData(){
+      let _this = this;
+      api.update${className}(this.getFormReqData()).then(res=>{
+        if(res.code == 0){
+          _this.saveSuccessCallback(res.result.$pk.attrname);
+        }
+        this.loading = false;
+      })
+    },
+    showError(err){
+      if(err){
+          let msg = (typeof err != "string" )? err.join("|"):err;
+          this.cToast({
+            text: msg,
+            type: "warning",
+            placement: "top",
+            closeOnClick: true
+        });
+      }
+    },
+    deleteLineEvent(index) {
+      if (!this.disabled) {
+        let _this = this;
+        this.cModal.confirm({
+          title: "提示信息",
+          message: "确认删除${comments}吗？",
+          effect: "zoom",
+          width: "260px",
+          type: "warning",
+          onConfirm() {
+           //TODO lineData(lineData为从表对应xxxList字段) Template
+            _this.formData.lineData.splice(index, 1);
+          }
+        });
+      }
+    },
+    clearLines() {
+      let _this = this;
+      //TODO lineData(lineData为从表对应xxxList字段) Template
+      if(_this.formData.lineData && _this.formData.lineData.length>0){
+        this.cModal.confirm({
+          title: "提示信息",
+          message: "确认清空${comments}吗？",
+          effect: "zoom",
+          width: "260px",
+          type: "warning",
+          onConfirm() {
+           //TODO lineData(lineData为从表对应xxxList字段) Template
+            _this.formData.lineData = [];
+          }
+        });
+      }
+
+    },
+    addLineEvent() {
+      let _this = this;
+
+      if(this.formData.lineData){ //TODO lineData(lineData为从表对应xxxList字段) Template
+           let idArr = this.formData.lineData.map((v)=>{return v.$pk.attrname;});
+           _this.lineModalSource =  this.lineModalData.filter(key => {return !idArr.includes(key.$pk.attrname)});
+      }else{
+            _this.lineModalSource = this.lineModalData;
+      }
+
+      _this.$refs.lineModal.open();
+    },
+    loadLineModalData() {
+      let _this = this;
+      //加载${comments}信息
+      var params = this.getLineModalDataReqParam();
+      return new Promise((resolve, reject) => {  
+        api.search${className}(params)
+          .then(
+            res => {            
+              if (res.code == 0) {
+                _this.lineModalData = res.result;
+                resolve();
+              } else {
+                processErr(res.message ? res.message : "获取路口数据失败");
+              }
+            },
+            err => {
+              processErr();
+            }
+          );
+
+        function processErr(msg) {
+          _this.cToast({
+            text: msg ? msg : "获取路口数据失败",
+            type: "warning",
+            placement: "top",
+            closeOnClick: true
+          });
+        }
+      });
+    },
+    getLineModalDataReqParam(){
+      //搜索参数
+      //this.lineModalDataReqParams.$pk.attrname = this.formData.$pk.attrname;
+      //return this.lineModalDataReqParams;
+    },
+    selectLineSureEvent(){
+      let checkRows = this.lineModalSelection.checkRows;
+      if (checkRows.length == 0) {
+        this.cToast({
+          text: "未选择任何记录！",
+          type: "warning",
+          placement: "top",
+          closeOnClick: true
+        });
+        return;
+      }
+
+      checkRows.forEach(item => {
+      	 //TODO lineData(lineData为从表对应xxxList字段) Template
+         this.formData.lineData.push(item); 
+      });     
+     
+      this.$refs.lineModal.close();
+    }
+  }
+};
+</script>
+<style lang="scss">
+</style>

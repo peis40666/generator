@@ -1,0 +1,35 @@
+// 覆盖组件样式。
+@import './cache.scss';
+
+.form{
+   
+    margin:15px;
+    color:#fffefc;
+    background:#1b2145 !important;
+    height: calc(100% - 30px);
+    overflow-y: auto;
+    .content{width:70%;margin:0 auto;padding-bottom:20px;height:auto;overflow:hidden}
+   
+    .title{font-size:14px;margin:0;padding:0;margin-bottom:10px;line-height: 32px;height: 32px;overflow: hidden;}
+    .box{padding:20px;border-bottom:1px dotted #373d61}
+    .item > li{
+        font-size: 14px;line-height: 36px;
+        padding:8px 10px;
+        align-items: center;
+        display: flex;
+    }
+
+    .item > li span:first-child,.w50 span{min-width:150px;text-align: right;padding-right:10px;}
+    .item > li span:first-child i,.w50 span i{color:#ff2323;margin-right: 5px;}
+    .c-btn-group{width:calc(100% - 130px)}
+    .w50{width:calc(50% - 15px);display: flex}
+    .c-btn-form{    
+        background: linear-gradient(rgba(4, 163, 176, 0.3), rgba(38, 87, 227, 0.3));
+        color:#fff; 
+        border: 1px solid;
+        border-image: linear-gradient(#04a3b0, #2657e3) 1 round;
+    }
+    .c-btn{height: 32px !important;line-height: 32px !important;}
+    .footer{margin:10px;text-align: center;margin-top:30px;}
+    .w64{min-width: 64px !important;}
+}

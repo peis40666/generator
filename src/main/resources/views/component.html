@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>代码生成器</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="css/main.css">
+<script src="libs/jquery.min.js"></script>
+<script src="plugins/layer/layer.js"></script>
+<script src="libs/bootstrap.min.js"></script>
+<script src="libs/vue.min.js"></script>
+<script src="plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="js/common.js"></script>
+</head>
+<body>
+	<div id="rrapp">
+
+		<table id="jqGrid" tabindex="0" role="presentation"
+			aria-multiselectable="false" aria-labelledby="gbox_jqGrid"
+			class="ui-jqgrid-btable ui-common-table table table-bordered"
+			style="width: 1015px;">
+			<tbody>
+				<tr class="jqgfirstrow" role="row">
+					<td role="gridcell" style="height: 0px; width: 25px;"></td>
+					<td role="gridcell" style="height: 0px; width: 268px;">名称</td>
+					<td role="gridcell" style="height: 0px; width: 187px;">说明</td>
+					<td role="gridcell" style="height: 0px; width: 268px;">版本</td>
+					<td role="gridcell" style="height: 0px; width: 267px;">操作</td>
+				</tr>
+				<tr role="row" id="1" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center; width: 25px;" title="1"
+						aria-describedby="jqGrid_rn">1</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">1、开发-如何通过组件库创建一个新的项目.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">1、开发-如何通过组件库创建一个新的项目</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">0.0.1-SNAPSHOT</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/1、开发-如何通过组件库创建一个新的项目.doc">下载</a>
+					</td>
+				</tr>
+				<tr role="row" id="2" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">2、重构-老的项目如何重构</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">2、重构-老的项目如何重构.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/2、重构-老的项目如何重构.doc">下载</a>
+					</td>
+				</tr>
+				<tr role="row" id="3" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">3、测试-部署说明</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">3、测试-部署说明.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/3、测试-部署说明.doc">下载</a>
+					</td>
+				</tr>
+				<tr role="row" id="4" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">4、关于组件库-组件库使用说明</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">4、关于组件库-组件库使用说明.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/4、关于组件库-组件库使用说明.doc">下载</a>
+					</td>
+				</tr>
+				<tr role="row" id="5" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">通用缓存组件-开发文档</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">通用缓存组件-开发文档.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/devguide/通用缓存组件-开发文档.doc" style="margin-right: 10px;">下载</a>
+						<a href="doc/component/javaDoc/msgbus/index.html">查看javaDoc</a>
+					</td>
+				</tr>
+				<tr role="row" id="6" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">消息总线组件-开发文档</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">消息总线组件-开发文档.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/devguide/消息总线组件-开发文档.doc" style="margin-right: 10px;">下载</a>
+						<a href="doc/component/javaDoc/basedatacahe/index.html">查看javaDoc</a>
+					</td>
+				</tr>
+				<tr role="row" id="7" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">配置管理组件-开发文档</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">配置管理组件-开发文档.doc</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/devguide/配置管理组件-开发文档.doc" style="margin-right: 10px;">下载</a>
+						<!-- <a href="doc/component/javaDoc/basedatacahe/index.html">查看javaDoc</a> -->
+					</td>
+				</tr>
+				<tr role="row" id="8" tabindex="-1" class="jqgrow ui-row-ltr">
+					<td role="gridcell" class="jqgrid-rownum active"
+						style="text-align: center;" title="2" aria-describedby="jqGrid_rn">2</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_modulName">excel解析组件-开发文档</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_version">excel解析组件-开发文档.docx</td>
+					<td role="gridcell" style="" title=""
+						aria-describedby="jqGrid_remark">v1.0</td>
+					<td role="gridcell" style="" title="" aria-describedby="jqGrid_opt">
+						<a href="doc/component/devguide/excel解析组件-开发文档.docx" style="margin-right: 10px;">下载</a>
+						<!-- <a href="doc/component/javaDoc/basedatacahe/index.html">查看javaDoc</a> -->
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- <div id="jqGridPager"></div> -->
+	</div>
+
+	<script src="js/archetypes.js"></script>
+</body>
+</html>

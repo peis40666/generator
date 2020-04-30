@@ -1,0 +1,194 @@
+
+#定义接口数据
+
+  /${moduleName}/${pathName}/list:
+    post:
+      tags:
+        - ${moduleName}
+      summary: ${comments}列表
+      produces:
+        - application/json
+      parameters:
+        - name: filter
+          in: body
+          description: 过滤条件
+          required: false
+          schema: 
+              $ref: "#/definitions/${className}Filter"
+          
+      responses:
+        '200':
+          description: 返回${comments}列表
+          schema:
+             $ref: "#/definitions/ApiResult[List[${className}Entity]]"
+                   
+                 
+  /${moduleName}/${pathName}/info:
+    post:
+      tags:
+        - ${moduleName}
+      summary: 获取${comments}信息
+      produces:
+        - application/json
+      parameters:
+        - name: ${pk.attrname}
+          description: 主键
+          in: query
+          type: string
+          required: true
+      responses:
+        '200':
+          description: 返回参数信息
+          schema:
+            $ref: "#/definitions/ApiResult[${className}Entity]"
+                
+                
+  /${moduleName}/${pathName}/save:
+    post:
+      tags:
+        - ${moduleName}
+      summary: 添加${comments}
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: ${comments}对象
+          in: body
+          type: string
+          schema:
+            $ref: '#/definitions/${className}Entity'
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/ApiResult[String]'
+            
+  /${moduleName}/${pathName}/update:
+    post:
+      tags:
+        - ${moduleName}
+      summary: 修改${comments}
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: ${comments}对象
+          in: body
+          type: string
+          schema:
+            $ref: '#/definitions/${className}Entity'
+          required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/ApiResult[String]'
+            
+  /${moduleName}/${pathName}/delete:
+    post:
+      tags:
+        - ${moduleName}
+      summary: 删除${comments}
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          description: ${comments}主键列表
+          in: body
+          schema:
+            uniqueItems: false
+            type: array
+              items:
+              type: integer
+              format: int64
+              default: 0
+            required: true
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/ApiResult[String]'
+            
+#定义数据模型
+            
+  ${className}Entity:
+    type: object
+    properties:
+    #foreach ($column in $columns)
+    
+      $column.attrname:
+        description: $column.comments
+        type: $column.attrType
+    #end   
+
+
+              
+  ${className}Filter:
+      type: object
+      description: 设备类型的自定义参数过滤条件  
+      properties:
+        page:
+          description: 页码
+          type: integer
+          required: true
+        limit:
+          description: 每页条数
+          type: integer
+          required: true
+        sidx:
+          description: 排序字段
+          type: string
+        order:
+          description: 排序方式，如：asc、desc
+          type: string
+                    #查询条件        
+            
+  ApiResult[${className}Entity]:
+      type: object
+      properties:
+        code:
+           description: 状态码
+           type: integer
+           enum: [ 0, 5000, 10001, 10002, 10003, 10008, 10012, 10021, 10026, 10027, 10028, 10029, 10030, 10031, 10032, 10033, 11000, 12000 ]
+           format: int32
+           default: 0
+        codeRemark:
+           description: 状态码描述
+           type: string
+        message:
+           description: 提示消息
+           type: string
+        result:
+           $ref: "#/definitions/${className}Entity"
+        totalCount:
+            description: 总记录数
+            type: integer
+           
+        totalPage:
+            description: 总页数
+            type: integer
+            
+  ApiResult[List[${className}Entity]]:
+      type: object
+      properties:
+        code:
+           description: 状态码
+           type: integer
+           enum: [ 0, 5000, 10001, 10002, 10003, 10008, 10012, 10021, 10026, 10027, 10028, 10029, 10030, 10031, 10032, 10033, 11000, 12000 ]
+           format: int32
+           default: 0
+        codeRemark:
+           description: 状态码描述
+           type: string
+        message:
+           description: 提示消息
+           type: string
+        result:
+           type: array
+           items:
+             $ref: '#/definitions/${className}Entity'
+        totalCount:
+            description: 总记录数
+            type: integer
+           
+        totalPage:
+            description: 总页数
+            type: integer          

@@ -1,0 +1,90 @@
+server:
+  port: 18018
+  tomcat:
+   uri-encoding: UTF-8
+spring:
+ profiles:
+  active: prod
+ application:
+  name: gen
+ cloud:
+  consul:
+    #微服务注册中心地址
+    host: 192.168.0.116
+    port: 8500
+    discovery:
+      instance-id: ${spring.application.name}:${spring.cloud.consul.discovery.ipAddress}:${server.port}
+      service-name: ${spring.application.name}
+      health-check-interval: 10s
+      register: true
+      tags: 代码生成器服务,swagger=swagger-ui.html,application=${spring.application.name}
+      prefer-ip-address: true
+      healthCheckPath: /actuator/health
+      ipAddress: 192.168.0.116
+##### 多数据源配置 #####
+ datasource:
+  dynamic:
+   primary: oracle
+#oracle 数据源配置
+   datasource:
+    oracle:
+     username: chd
+     password: citms
+     driver-class-name: oracle.jdbc.driver.OracleDriver
+     url: jdbc:oracle:thin:@192.168.10.113:1521:orcl
+#librA 数据源配置
+    mysql:
+     username: root
+     password: root
+     driver-class-name: com.mysql.jdbc.Driver
+     url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+ resources:
+  static-locations: classpath:/static/,classpath:/views/
+ http:
+  encoding:
+   force: true
+   charset: UTF-8
+   enabled: true
+# Mybatis配置
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+#日志配置
+database:
+ #显示spl性能信息
+ showPerformance: false
+
+#日志级别配置
+logging:
+ level:
+  com.citms.dao: debug
+  
+##### mybatis plus配置 #####
+mybatis-plus:
+  # mapper xml文件目录
+ mapper-locations: classpath:mapper/*Dao.xml
+ #实体扫描，多个package用逗号或者分号分隔
+ typeAliasesPackage: com.citms.entity
+ #typeEnumsPackage: com.citms.enums
+  #主键类型  0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID"
+ global-config:
+  id-type: 3
+  #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+  field-strategy: 2
+  #驼峰下划线转换
+  db-column-underline: false
+  #刷新mapper 调试神器
+  refresh-mapper: true
+  #配置返回数据库(column下划线命名&&返回java实体是驼峰命名)，自动匹配无需as（没开启这个，SQL需要写as： select user_id as userId）
+  sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector #软删除
+  logic-delete-value: 1
+  logic-not-delete-value: 0
+ configuration:
+  jdbc-type-for-null: null
+  map-underscore-to-camel-case: true
+  #禁用缓存
+  cache-enabled: false
+  db-config:
+   db-type: oracle
