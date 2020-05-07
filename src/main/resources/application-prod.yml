@@ -20,22 +20,28 @@ spring:
 ##### 多数据源配置 #####
  datasource:
   dynamic:
-   primary: mysql
+   primary: oracle-chd
 #oracle 数据源配置
    datasource:
-    oracle:
+    oracle-chd:
      username: chd
      password: citms
      driver-class-name: oracle.jdbc.driver.OracleDriver
      url: jdbc:oracle:thin:@192.168.10.113:1521:orcl
+    oracle-zhzepp:
+     username: zhzepp
+     password: citms
+     driver-class-name: oracle.jdbc.driver.OracleDriver
+     url: jdbc:oracle:thin:@192.168.10.113:1521:orcl
+
 #librA 数据源配置
-    librA:
+    librA-tjeppv5:
      username: tjeppv5
      password: citms@123
      driver-class-name: org.postgresql.Driver
      url: jdbc:postgresql://192.168.0.147:25308/tjeppv5
 #mysql 数据源配置
-    mysql:
+    mysql-eppv5-dev:
      username: root
      password: citms
      driver-class-name: com.mysql.jdbc.Driver

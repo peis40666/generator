@@ -2,6 +2,7 @@ package com.citms.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ public class SysGeneratorController {
 	@ResponseBody
 	@RequestMapping("/ds")
 	public R ds(){
-		List<DataSourcePojo> dataSourcePojoList = new ArrayList<>();
+		List<DataSourcePojo> list = new ArrayList<>();
 		Map<String, DataSourceProperty> map = dynamicDataSourceProperties.getDatasource();
 		for (Map.Entry<String, DataSourceProperty> entry : map.entrySet()) {
 			DataSourcePojo ds = new DataSourcePojo();
@@ -71,9 +72,10 @@ public class SysGeneratorController {
 			ds.setPassword(dataSourceProperty.getPassword());
 			ds.setDriverClassName(dataSourceProperty.getDriverClassName());
 			ds.setUrl(dataSourceProperty.getUrl());
-			dataSourcePojoList.add(ds);
+			list.add(ds);
 		}
-		return R.ok().put("dsList",dataSourcePojoList);
+	//	PageUtils pageUtil = new PageUtils(list, (int) page.getTotal(), page.getSize(), page.getCurrent());
+		return R.ok().put("dsList",list);
 	}
 
 	/**

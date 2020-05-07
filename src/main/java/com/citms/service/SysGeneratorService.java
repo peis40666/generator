@@ -65,7 +65,7 @@ public class SysGeneratorService {
 		return outputStream.toByteArray();
 	}
 
-
+    @SetDSPrimary
 	public List<TableEntity> queryList(Page<TableEntity> page, Map<String, Object> map) {
 		return sysGeneratorDao.queryList(page,map);
 	}

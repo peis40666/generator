@@ -30,7 +30,7 @@ var vm = new Vue({
 
 //路由
 var router = new Router();
-var menus = ["generator.html","archetypes.html","doc.html","component.html"];
+var menus = ["generator.html","datasource.html","archetypes.html","doc.html","component.html"];
 routerList(router, menus);
 router.start();
 

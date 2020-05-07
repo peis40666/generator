@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import java.util.Map;
 
 import java.lang.reflect.Method;
 
@@ -37,8 +38,10 @@ public class SetDsPrimaryAspect {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
         final Object[] args = point.getArgs();//参数
-        dynamicRoutingDataSource.setPrimary("mysql");
-        DataBaseContextHolder.DB_TYPE = DataBaseContextHolder.dbType.get(dynamicDataSourceProperties.getDatasource().get("mysql").getDriverClassName());
+        Map<String,String> map = (Map<String, String>) args[1];
+        String dataSource =  map.get("datasource");
+        dynamicRoutingDataSource.setPrimary(dataSource);
+        DataBaseContextHolder.DB_TYPE = DataBaseContextHolder.dbType.get(dynamicDataSourceProperties.getDatasource().get(dataSource).getDriverClassName());
         log.info("");
         return point.proceed();
     }

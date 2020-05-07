@@ -26,7 +26,7 @@
 				<input type="text" class="form-control" v-model="q.tableName"
 					@keyup.enter="query" placeholder="表名">
 			</div>
-			<a class="btn btn-default" @click="query">查询</a> <a
+			<a  class="btn btn-default" @click="query">查询</a> <a
 				class="btn btn-primary" @click="generator"><i
 				class="fa fa-file-code-o"></i>&nbsp; 生成 <input type="text"
 				style="width: 135px; height: 20px; display: inline-block;padding:5px;"
@@ -34,9 +34,7 @@
 				@click="stopPropagation" class="form-control"
 				v-model="q.moduleName" placeholder="服务标识，ex:fmw"> 微服务代码 </a>
 			<div class="form-group col-sm-1">
-				<select class="form-control" v-model="q.datasource" placeholder="数据源">
-					<option selected="true">选择数据源</option>
-					<option value="mysql">mysql</option>
+				<select class="form-control" id="datasource" v-model="q.datasource" placeholder="数据源">
 				</select>
 			</div>
 
